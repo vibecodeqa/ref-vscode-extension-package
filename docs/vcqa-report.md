@@ -10,6 +10,12 @@ Score: **99/100** — grade **A**
 | CI evidence | [run 31280809121](https://github.com/vibecodeqa/ref-vscode-extension-package/actions/runs/31280809121) — `success`, 2026-08-08T22:04:42Z |
 | Detected stack | `typescript` |
 
+The assessed commit is the last commit before this report file existed — a report
+cannot contain its own hash. The score was re-run against the head of `main`
+after this file landed and was unchanged at 99/100; every later commit on `main`
+must keep [CI](https://github.com/vibecodeqa/ref-vscode-extension-package/actions/workflows/ci.yml)
+green, and this file is re-generated whenever the score moves.
+
 ## Standards this repo is judged against
 
 | Standard | Status | URL |

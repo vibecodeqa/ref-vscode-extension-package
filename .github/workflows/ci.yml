@@ -1,0 +1,137 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PNPM_VERSION: 10.33.3
+  NODE_VERSION: "24"
+
+jobs:
+  verify:
+    name: Lint, typecheck, test, package
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: Compile
+        run: pnpm run compile
+
+      # VS Code ships as an Electron app: it needs a display and the usual GTK
+      # stack even in headless CI. Package names below are the ubuntu-24.04 ones
+      # (the t64 ABI transition renamed several of them).
+      - name: Install VS Code runtime libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            xvfb \
+            libnss3 \
+            libgbm1 \
+            libgtk-3-0t64 \
+            libatk-bridge2.0-0t64 \
+            libatspi2.0-0t64 \
+            libasound2t64 \
+            libxkbcommon0 \
+            libdrm2 \
+            libxdamage1 \
+            libxfixes3 \
+            libxrandr2 \
+            libcups2t64 \
+            libpango-1.0-0 \
+            libcairo2 \
+            libsecret-1-0
+
+      - name: VS Code extension integration tests
+        run: xvfb-run -a pnpm test:integration
+
+      - name: Package extension (.vsix)
+        run: pnpm run package
+
+      - name: Verify the .vsix contents
+        run: |
+          set -euo pipefail
+          test -f ref-vscode-extension-package.vsix
+          unzip -l ref-vscode-extension-package.vsix
+          # The compiled entry point must be inside the package...
+          unzip -l ref-vscode-extension-package.vsix | grep -q 'extension/out/extension.js'
+          # ...and nothing test-, source- or fixture-related may be.
+          if unzip -l ref-vscode-extension-package.vsix | grep -Eq 'extension/(src|tests|test-fixtures|out/integration)/'; then
+            echo "::error::.vsix contains source or test material"
+            exit 1
+          fi
+
+      - name: Upload .vsix
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ref-vscode-extension-package-vsix
+          path: ref-vscode-extension-package.vsix
+          if-no-files-found: error
+          retention-days: 14
+
+  supply-chain:
+    name: Audit and licenses
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      # Exception policy lives in SECURITY.md. Neither gate may be skipped or
+      # marked continue-on-error; exceptions are reviewed commits instead.
+      - name: Dependency audit (fails on high/critical)
+        run: pnpm audit --audit-level=high
+
+      - name: License allow-list gate
+        run: pnpm run licenses:check

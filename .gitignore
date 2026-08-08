@@ -1,0 +1,9 @@
+node_modules/
+!test-fixtures/workspace/node_modules/
+out/
+dist/
+*.vsix
+.vscode-test/
+coverage/
+.vibe-check/
+.DS_Store

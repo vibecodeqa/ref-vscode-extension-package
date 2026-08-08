@@ -1,0 +1,109 @@
+{
+  "name": "ref-vscode-extension-package",
+  "displayName": "VCQA Reference Extension",
+  "description": "Product-neutral reference implementation for the VibeCode QA vscode-extension-package standard.",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "publisher": "vibecodeqa",
+  "author": "VibeCode QA",
+  "packageManager": "pnpm@10.33.3",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vibecodeqa/ref-vscode-extension-package.git"
+  },
+  "bugs": {
+    "url": "https://github.com/vibecodeqa/ref-vscode-extension-package/issues"
+  },
+  "homepage": "https://github.com/vibecodeqa/ref-vscode-extension-package#readme",
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "reference",
+    "vibecodeqa",
+    "standards"
+  ],
+  "engines": {
+    "vscode": "^1.104.0",
+    "node": ">=22 <27",
+    "pnpm": ">=10 <11"
+  },
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onCommand:refVscodeExt.showWorkspaceSummary",
+    "onCommand:refVscodeExt.countFilesByGlob"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "In an untrusted workspace the extension loads but refuses to enumerate workspace files. Both commands return a blocked result and show a warning instead of touching the file system.",
+      "restrictedConfigurations": [
+        "refVscodeExt.excludeGlob"
+      ]
+    },
+    "virtualWorkspaces": {
+      "supported": "limited",
+      "description": "Commands use the workspace file-search API only, so they work on virtual file systems, but results depend on what the file-system provider exposes."
+    }
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "refVscodeExt.showWorkspaceSummary",
+        "title": "Show Workspace File Summary",
+        "category": "VCQA Reference"
+      },
+      {
+        "command": "refVscodeExt.countFilesByGlob",
+        "title": "Count Workspace Files By Glob",
+        "category": "VCQA Reference"
+      }
+    ],
+    "configuration": {
+      "title": "VCQA Reference",
+      "properties": {
+        "refVscodeExt.excludeGlob": {
+          "type": "string",
+          "default": "**/node_modules/**",
+          "markdownDescription": "Glob excluded from every workspace scan. Restricted in untrusted workspaces because it steers which files are read."
+        },
+        "refVscodeExt.maxResults": {
+          "type": "integer",
+          "default": 2000,
+          "minimum": 1,
+          "maximum": 20000,
+          "description": "Upper bound on files inspected by a single scan."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p tsconfig.build.json",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:integration": "pnpm run compile && vscode-test",
+    "package": "pnpm run compile && vsce package --no-dependencies --out ref-vscode-extension-package.vsix",
+    "audit": "pnpm audit --audit-level=high",
+    "licenses:check": "node scripts/check-licenses.mjs",
+    "vcqa": "npx --yes @vibecodeqa/cli --markdown"
+  },
+  "pnpm": {
+    "overrides": {
+      "serialize-javascript": "^7.1.0"
+    }
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.7",
+    "@types/mocha": "10.0.10",
+    "@types/node": "24.10.1",
+    "@types/vscode": "1.104.0",
+    "@vscode/test-cli": "0.0.15",
+    "@vscode/test-electron": "3.1.0",
+    "@vscode/vsce": "3.9.2",
+    "typescript": "6.0.3",
+    "vitest": "4.1.10"
+  }
+}

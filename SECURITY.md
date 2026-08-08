@@ -32,6 +32,27 @@ CI runs two supply-chain gates on every push and pull request:
 - **`node scripts/check-licenses.mjs`** — fails the build on any license outside
   the permissive allow-list in that script.
 
+### Update cadence
+
+There is deliberately **no Dependabot configuration**. This project is
+trunk-based and takes no pull requests, so a bot whose only output channel is a
+pull request has nowhere to put its findings; it opened two before being
+removed. Updates are taken by hand, in a commit that re-runs the whole gate set,
+and the two gates above are what actually protect the repository between those
+reviews. That the cadence is manual is a real residual risk and is recorded as
+one rather than presented as solved.
+
+Two upgrades are currently held back on purpose, and neither is an oversight:
+
+- **`typescript` stays at 6.0.3** while 7.0.2 exists. The `typescript@v1` rubric
+  targets TypeScript 6, and 7 is the native-port rewrite; that bump belongs in a
+  change that re-verifies the whole toolchain.
+- **`@types/vscode` stays at 1.104.0**, matching `engines.vscode: ^1.104.0`.
+  Raising the types alone breaks `vsce package`, which requires the types
+  version to be no newer than the declared engine; raising both would narrow the
+  range of VS Code versions this extension claims to support, which is a
+  compatibility decision rather than a routine dependency bump.
+
 ### Exception policy
 
 There is no "skip the gate" flag and no `continue-on-error` on either step.

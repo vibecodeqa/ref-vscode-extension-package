@@ -177,8 +177,10 @@ lane. Until that fix lands, issue #19's resolver acceptance criterion is met for
   suppression entry needed.
 - **TypeScript is pinned at 6.0.3 while 7.0.2 exists** (dependencies, 99).
   Deliberate: `typescript@v1` targets TypeScript 6, and 7 is the native-port
-  rewrite. Dependabot will keep raising it; the bump belongs in a change that
-  re-verifies the whole toolchain, not in this one.
+  rewrite. The bump belongs in a change that re-verifies the whole toolchain,
+  not in this one. Dependabot was briefly enabled and raised it; the bot has
+  since been removed, because this project is trunk-based and takes no pull
+  requests. The update cadence that replaces it is documented in `SECURITY.md`.
 - **No `CONTRIBUTING.md`, no pre-commit hooks, no commitlint** (best-practices,
   94). Left off deliberately: this is a fixture people fork, and shipping a
   contribution process for a repository that takes no contributions would be

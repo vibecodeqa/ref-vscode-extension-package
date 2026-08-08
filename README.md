@@ -33,6 +33,7 @@ pnpm install
 pnpm lint
 pnpm typecheck
 pnpm test              # Vitest — pure logic
+pnpm test:coverage     # same, with enforced thresholds over src/lib/**
 pnpm compile
 pnpm test:integration  # VS Code extension host (Electron); on Linux use xvfb-run -a
 pnpm package           # produces ref-vscode-extension-package.vsix
@@ -135,7 +136,10 @@ Two layers, split on cost rather than on convention:
   it activates on demand, every contributed command is really registered,
   `findFiles` returns the fixture files, and `node_modules` is excluded.
 
-Anything provable without Electron is proved without Electron. See
+Anything provable without Electron is proved without Electron. Coverage is
+enforced (95% statements/functions/lines, 90% branches) over `src/lib/**` only —
+`src/extension.ts` is the host adapter and is covered by the integration layer,
+so folding it into the same threshold would buy a number rather than a test. See
 [`docs/vcqa-report.md`](docs/vcqa-report.md) for what that costs in coverage.
 
 ## Packaging and marketplace release expectations

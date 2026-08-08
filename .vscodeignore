@@ -12,6 +12,8 @@ out/**/*.map
 **/*.ts
 **/tsconfig*.json
 biome.json
+knip.json
+coverage/**
 vitest.config.mts
 pnpm-lock.yaml
 .vibe-check/**

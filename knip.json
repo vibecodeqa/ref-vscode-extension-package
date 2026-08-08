@@ -1,0 +1,14 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "src/extension.ts!",
+    "src/integration/**/*.test.ts",
+    "tests/**/*.test.ts",
+    "scripts/*.mjs",
+    ".vscode-test.mjs",
+    "vitest.config.mts"
+  ],
+  "project": ["src/**/*.ts", "tests/**/*.ts", "scripts/**/*.mjs"],
+  "ignore": ["out/**", "test-fixtures/**"],
+  "ignoreDependencies": ["@types/vscode", "@types/mocha"]
+}
